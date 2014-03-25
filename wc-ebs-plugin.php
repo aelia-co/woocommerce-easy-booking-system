@@ -28,7 +28,7 @@ class WC_EBS extends WC_AJAX {
         // Load scripts only on product page if "booking" option is checked
         $wc_ebs_options = get_post_meta($post->ID, '_booking_option', true);
 
-        if ( is_product() && $wc_ebs_options['_booking_option']) {
+        if ( is_product() && $wc_ebs_options) {
 
             // Concatenated and minified script including datepick.js, legacy.js, picker.js and picker.date.js
             wp_enqueue_script( 'datepicker', plugins_url( '/js/pickadate.min.js', __FILE__ ), array('jquery'), '1.0', true);
@@ -84,7 +84,7 @@ class WC_EBS extends WC_AJAX {
         global $woocommerce, $post, $product;
 
         $wc_ebs_options = get_post_meta($post->ID, '_booking_option', true);
-        if (isset($wc_ebs_options['_booking_option']) && $wc_ebs_options['_booking_option']) {
+        if (isset($wc_ebs_options) && $wc_ebs_options) {
             if ( $this->options['wc_ebs_info_text_display'] ) {
                 echo '<p class="woocommerce-info">' . __( $this->options['wc_ebs_info_text'] ) . '</p>';
             }
@@ -118,7 +118,7 @@ class WC_EBS extends WC_AJAX {
         // Return either the new price or a price / day or normal price
         if ( isset($_POST['days']) && $_POST['days'] > 0 ) {
             return $new_price . $currency;
-        } else if ( isset($wc_ebs_options['_booking_option']) && $wc_ebs_options['_booking_option'] ) {
+        } else if ( isset($wc_ebs_options) && $wc_ebs_options ) {
             return $content . __(' / day', 'wc_ebs');
         } else {
             return $content;
@@ -266,7 +266,7 @@ class WC_EBS extends WC_AJAX {
         global $woocommerce, $post, $product;
         $wc_ebs_options = get_post_meta($post->ID, '_booking_option', true);
 
-        if (isset($wc_ebs_options['_booking_option']) && $wc_ebs_options['_booking_option']) {
+        if (isset($wc_ebs_options) && $wc_ebs_options) {
 
             $link = get_permalink( $product->id );
             $label = __( 'Select dates', 'wc_ebs' );
