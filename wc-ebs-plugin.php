@@ -117,7 +117,7 @@ class WC_EBS extends WC_AJAX {
 
         // Return either the new price or a price / day or normal price
         if ( isset($_POST['days']) && $_POST['days'] > 0 ) {
-            return $new_price . $currency;
+            return sprintf( get_woocommerce_price_format(), $currency, $new_price );
         } else if ( isset($wc_ebs_options) && $wc_ebs_options ) {
             return $content . __(' / day', 'wc_ebs');
         } else {
