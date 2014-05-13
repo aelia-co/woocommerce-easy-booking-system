@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Woocommerce easy booking system
-Plugin URI: http://github.com/Ashanna/woocommerce-easy-booking-system
+Plugin URI: http://wordpress.org/plugins/woocommerce-easy-booking-system/
 Description: Allows users to rent or book products
-Version: 1.0
+Version: 1.0.4
 Author: Natasha Lavail
 Author URI: http://ashanna.com
 Licence : GPL
