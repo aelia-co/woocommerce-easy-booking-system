@@ -8,7 +8,7 @@ class WC_EBS_settings {
 		$this->options = get_option('wc_ebs_options');
 		
 		// initialize options the first time
-		if(!$this->options) {
+		if ( !$this->options ) {
 		
 		    $this->options = array( 'wc_ebs_info_text_display' => '',
 		    						'wc_ebs_info_text' => '',
@@ -19,7 +19,7 @@ class WC_EBS_settings {
 
 		}
 
-		if(is_admin()) {
+		if ( is_admin() ) {
 
 			add_action('admin_menu', array($this, 'wc_ebs_add_option_page'));
 			add_action('admin_init', array($this, 'wc_ebs_admin_init'));
@@ -29,10 +29,14 @@ class WC_EBS_settings {
 	}
 
 	public function wc_ebs_add_option_page() {
-		add_options_page('Easy Booking Options', 'Easy Booking Options', 'manage_options', 'wc_ebs_options', array( $this, 'wc_ebs_option_page' ));
+		$option_page = add_options_page('Easy Booking Options', 'Easy Booking Options', 'manage_options', 'wc_ebs_options', array( $this, 'wc_ebs_option_page' ));
+		add_action( 'admin_print_scripts-'. $option_page, array($this, 'load_admin_scripts'));
 	}
 
-	
+	function load_admin_scripts() {
+	  	wp_enqueue_style('wp-color-picker');
+	  	wp_enqueue_script('myplugin-script', plugins_url('js/script.js', dirname(__FILE__)), array('wp-color-picker'), false, true );
+	}
 
 	public function wc_ebs_admin_init() {
 
@@ -77,6 +81,14 @@ class WC_EBS_settings {
 			'wc_ebs_end_date_text',
 			__('Second date title', 'wc_ebs'),
 			array( $this, 'wc_ebs_end_date' ),
+			'wc_ebs_options',
+			'wc_ebs_main'
+		);
+
+		add_settings_field(
+			'wc_ebs_color_select',
+			__('Main color', 'wc_ebs'),
+			array( $this, 'wc_ebs_color' ),
 			'wc_ebs_options',
 			'wc_ebs_main'
 		);
@@ -126,6 +138,10 @@ class WC_EBS_settings {
 	public function wc_ebs_end_date() {
 		echo '<input id="plugin_text_string" name="wc_ebs_options[wc_ebs_end_date_text]" size="40" type="text" value="' . $this->options['wc_ebs_end_date_text'] . '" />
 		<p class="description">' . __('Text displayed before the second date', 'wc_ebs') . '</p>';
+	}
+
+	public function wc_ebs_color() {
+		echo '<input type="text" class="color-field">';
 	}
 
 	public function sanitize_values( $settings ) {

@@ -40,7 +40,7 @@ class WC_EBS extends WC_AJAX {
 
             wp_enqueue_script( 'datepicker.language', plugins_url( '/js/translations/' . $lang . '.js', __FILE__ ), array('jquery'), '1.0', true);
 
-            wp_register_style( 'picker', plugins_url('/css/default.min.css', __FILE__), true);
+            wp_register_style( 'picker', plugins_url('/css/default.css', __FILE__), true);
 
             wp_enqueue_style( 'picker' );
             // wp_enqueue_style( 'picker.date' );
@@ -61,9 +61,9 @@ class WC_EBS extends WC_AJAX {
         echo '<div class="options_group">';
 
             // Checkbox
-            woocommerce_wp_checkbox(array(
+            woocommerce_wp_checkbox( array(
                 'id' => '_booking_option', 
-                'class' => 'wc_booking_option checkbox', 
+                'class' => 'wc_booking_option checkbox',
                 'wrapper_class' => 'show_if_simple',
                 'label' => __( 'Add booking option', 'wc_ebs' )
             ));
