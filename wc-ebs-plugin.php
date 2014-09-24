@@ -222,23 +222,11 @@ class WC_EBS extends WC_AJAX {
 
         global $woocommerce;
 
-        if ( get_post_meta($product_id, '_booking_price', true ) ) {
-            update_post_meta($product_id, '_booking_price', $new_price);
-        } else {
-            add_post_meta($product_id, '_booking_price', $new_price, true);
-        }
+        add_post_meta( $product_id, '_booking_price', $new_price, true ) || update_post_meta( $product_id, '_booking_price', $new_price );
 
-        if ( get_post_meta($product_id, '_start_date', true ) ) {
-            update_post_meta($product_id, '_start_date', $start_date);
-        } else {
-            add_post_meta($product_id, '_start_date', $start_date, true);
-        }
+        add_post_meta( $product_id, '_start_date', $new_price, true ) || update_post_meta( $product_id, '_start_date', $new_price );
 
-        if ( get_post_meta($product_id, '_end_date', true ) ) {
-            update_post_meta($product_id, '_end_date', $end_date);
-        } else {
-            add_post_meta($product_id, '_end_date', $end_date, true); 
-        }
+        add_post_meta( $product_id, '_end_date', $new_price, true ) || update_post_meta( $product_id, '_end_date', $new_price );
 
     }
 

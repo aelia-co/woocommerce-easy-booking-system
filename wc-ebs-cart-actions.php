@@ -54,15 +54,15 @@ class WC_EBS_Cart extends WC_Cart {
     function wc_ebs_reset_product_meta( $product_id, $base_price, $start, $end ) {
 
         if ( get_post_meta( $product_id, '_booking_price', true ) ) {
-            update_post_meta($product_id, '_booking_price', $base_price);
+            delete_post_meta($product_id, '_booking_price');
         }
 
         if ( get_post_meta( $product_id, '_start_date', true ) ) {
-            delete_post_meta($product_id, '_start_date', $start);
+            delete_post_meta($product_id, '_start_date');
         }
 
         if ( get_post_meta( $product_id, '_end_date', true ) ) {
-            delete_post_meta($product_id, '_end_date', $end);
+            delete_post_meta($product_id, '_end_date');
         }
 
     }
