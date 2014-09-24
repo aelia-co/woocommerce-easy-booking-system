@@ -13,7 +13,10 @@ class WC_EBS_settings {
 		    $this->options = array( 'wc_ebs_info_text_display' => '',
 		    						'wc_ebs_info_text' => '',
 		    						'wc_ebs_start_date_text' => 'Début', 
-		                            'wc_ebs_end_date_text' => 'Fin'
+		                            'wc_ebs_end_date_text' => 'Fin',
+		                            'wc_ebs_background_color' => '#FFFFFF',
+		                            'wc_ebs_color_select' => '#0089EC',
+		                            'wc_ebs_text_color' => '#000000'
 		                        );
 		    add_option('wc_ebs_options', $this->options);
 
@@ -26,6 +29,8 @@ class WC_EBS_settings {
 
 		}
 
+		
+
 	}
 
 	public function wc_ebs_add_option_page() {
@@ -33,9 +38,9 @@ class WC_EBS_settings {
 		add_action( 'admin_print_scripts-'. $option_page, array($this, 'load_admin_scripts'));
 	}
 
-	function load_admin_scripts() {
+	public function load_admin_scripts() {
 	  	wp_enqueue_style('wp-color-picker');
-	  	wp_enqueue_script('myplugin-script', plugins_url('js/script.js', dirname(__FILE__)), array('wp-color-picker'), false, true );
+	  	wp_enqueue_script('color-picker', plugins_url('js/script.js', dirname(__FILE__)), array('wp-color-picker'), false, true );
 	}
 
 	public function wc_ebs_admin_init() {
@@ -86,9 +91,25 @@ class WC_EBS_settings {
 		);
 
 		add_settings_field(
+			'wc_ebs_background_color',
+			__('Background color', 'wc_ebs'),
+			array( $this, 'wc_ebs_background' ),
+			'wc_ebs_options',
+			'wc_ebs_main'
+		);
+
+		add_settings_field(
 			'wc_ebs_color_select',
 			__('Main color', 'wc_ebs'),
 			array( $this, 'wc_ebs_color' ),
+			'wc_ebs_options',
+			'wc_ebs_main'
+		);
+
+		add_settings_field(
+			'wc_ebs_text_color',
+			__('Text color', 'wc_ebs'),
+			array( $this, 'wc_ebs_text' ),
 			'wc_ebs_options',
 			'wc_ebs_main'
 		);
@@ -140,8 +161,19 @@ class WC_EBS_settings {
 		<p class="description">' . __('Text displayed before the second date', 'wc_ebs') . '</p>';
 	}
 
+	public function wc_ebs_background() {
+		$background_color = ( isset( $this->options['wc_ebs_background_color'] ) ) ? $this->options['wc_ebs_background_color'] : '';
+		echo '<input type="text"  name="wc_ebs_options[wc_ebs_background_color]" class="color-field" value="' . $background_color . '">';
+	}
+
 	public function wc_ebs_color() {
-		echo '<input type="text" class="color-field">';
+		$main_color = ( isset( $this->options['wc_ebs_color_select'] ) ) ? $this->options['wc_ebs_color_select'] : '';
+		echo '<input type="text"  name="wc_ebs_options[wc_ebs_color_select]" class="color-field" value="' . $main_color . '">';
+	}
+
+	public function wc_ebs_text() {
+		$text_color = ( isset( $this->options['wc_ebs_text_color'] ) ) ? $this->options['wc_ebs_text_color'] : '';
+		echo '<input type="text"  name="wc_ebs_options[wc_ebs_text_color]" class="color-field" value="' . $text_color . '">';
 	}
 
 	public function sanitize_values( $settings ) {

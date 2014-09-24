@@ -15,6 +15,7 @@ function wc_ebs_init() {
         include_once('wc-ebs-plugin.php');
         include_once('wc-ebs-cart-actions.php');
         include_once('options/wc-ebs-options.php');
+        include_once('options/color-picker.php');
     }
 }
 

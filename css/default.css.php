@@ -1,3 +1,39 @@
+<?php
+header("Content-type: text/css; charset: UTF-8");
+
+$background_color = isset( $this->options['wc_ebs_background_color'] ) ? $this->options['wc_ebs_background_color'] : '#FFFFFF';
+$main_color = isset( $this->options['wc_ebs_color_select'] ) ? $this->options['wc_ebs_color_select'] : '#0089EC';
+$text_color = isset( $this->options['wc_ebs_text_color'] ) ? $this->options['wc_ebs_text_color'] : '#000000';
+
+
+function adjustBrightness($hex, $steps) {
+    // Steps should be between -255 and 255. Negative = darker, positive = lighter
+    $steps = max(-255, min(255, $steps));
+
+    // Format the hex color string
+    $hex = str_replace('#', '', $hex);
+    if (strlen($hex) == 3) {
+        $hex = str_repeat(substr($hex,0,1), 2).str_repeat(substr($hex,1,1), 2).str_repeat(substr($hex,2,1), 2);
+    }
+
+    // Get decimal values
+    $r = hexdec(substr($hex,0,2));
+    $g = hexdec(substr($hex,2,2));
+    $b = hexdec(substr($hex,4,2));
+
+    // Adjust number of steps and keep it inside 0 to 255
+    $r = max(0,min(255,$r + $steps));
+    $g = max(0,min(255,$g + $steps));  
+    $b = max(0,min(255,$b + $steps));
+
+    $r_hex = str_pad(dechex($r), 2, '0', STR_PAD_LEFT);
+    $g_hex = str_pad(dechex($g), 2, '0', STR_PAD_LEFT);
+    $b_hex = str_pad(dechex($b), 2, '0', STR_PAD_LEFT);
+
+    return '#'.$r_hex.$g_hex.$b_hex;
+}
+
+?>
 /* ==========================================================================
    $BASE-PICKER
    ========================================================================== */
@@ -9,7 +45,7 @@
   font-size: 16px;
   text-align: left;
   line-height: 1.2;
-  color: #000000;
+  color: <?php echo $text_color; ?>;
   position: absolute;
   z-index: 10000;
 }
@@ -19,11 +55,12 @@
 .picker__input {
   cursor: default;
 }
+}
 /**
  * When the picker is opened, the input element is “activated”.
  */
 .picker__input.picker__input--active {
-  border-color: #0089ec;
+  border-color: <?php echo $main_color; ?>;
 }
 /**
  * The holder is the only “scrollable” top-level container element.
@@ -104,7 +141,7 @@
  * The box contains all the picker contents.
  */
 .picker__box {
-  background: #ffffff;
+  background:<?php echo $background_color; ?>;
   display: table-cell;
   vertical-align: middle;
 }
@@ -117,8 +154,8 @@
   .picker__box {
     display: block;
     font-size: 1.33em;
-    border: 1px solid #777777;
-    border-top-color: #898989;
+    border: 1px solid <?php echo adjustBrightness($background_color, -150); ?>;
+    border-top-color: <?php echo adjustBrightness($background_color, -125); ?>;
     border-bottom-width: 0;
     -webkit-border-radius: 5px 5px 0 0;
     -moz-border-radius: 5px 5px 0 0;
@@ -195,7 +232,7 @@
   margin-right: .25em;
 }
 .picker__year {
-  color: #999999;
+  color: <?php echo adjustBrightness($background_color, -100); ?>;
   font-size: .8em;
   font-style: italic;
 }
@@ -205,7 +242,7 @@
 .picker__select--month,
 .picker__select--year {
   font-size: .8em;
-  border: 1px solid #b7b7b7;
+  border: 1px solid <?php echo adjustBrightness($background_color, -50); ?>;
   height: 2.5em;
   padding: .5em .25em;
   margin-left: .25em;
@@ -220,7 +257,7 @@
 }
 .picker__select--month:focus,
 .picker__select--year:focus {
-  border-color: #0089ec;
+  border-color: <?php echo $main_color; ?>;
 }
 /**
  * The month navigation buttons.
@@ -231,7 +268,6 @@
   top: -0.33em;
   padding: .5em 1.33em;
   width: 1em;
-  height: 1em;
 }
 .picker__nav--prev {
   left: -1em;
@@ -246,7 +282,7 @@
   content: " ";
   border-top: .5em solid transparent;
   border-bottom: .5em solid transparent;
-  border-right: 0.75em solid #000000;
+  border-right: 0.75em solid <?php echo $text_color; ?>;
   width: 0;
   height: 0;
   display: block;
@@ -254,13 +290,13 @@
 }
 .picker__nav--next:before {
   border-right: 0;
-  border-left: 0.75em solid #000000;
+  border-left: 0.75em solid <?php echo $text_color; ?>;
 }
 .picker__nav--prev:hover,
 .picker__nav--next:hover {
   cursor: pointer;
-  color: #000000;
-  background: #b1dcfb;
+  color: <?php echo $text_color; ?>;
+  background: <?php echo adjustBrightness($main_color, 150); ?>;
 }
 .picker__nav--disabled,
 .picker__nav--disabled:hover,
@@ -268,8 +304,8 @@
 .picker__nav--disabled:before:hover {
   cursor: default;
   background: none;
-  border-right-color: #f5f5f5;
-  border-left-color: #f5f5f5;
+  border-right-color: <?php echo adjustBrightness($background_color, -10); ?>;
+  border-left-color: <?php echo adjustBrightness($background_color, -10); ?>;
 }
 /**
  * The calendar table of dates
@@ -284,6 +320,11 @@
   margin-top: .75em;
   margin-bottom: .5em;
 }
+
+.picker__table td, .picker__table th {
+  border: none;
+}
+
 @media (min-height: 33.875em) {
   .picker__table {
     margin-bottom: .75em;
@@ -300,7 +341,7 @@
   width: 14.285714286%;
   font-size: .75em;
   padding-bottom: .25em;
-  color: #999999;
+  color: <?php echo adjustBrightness($background_color, -100); ?>;
   font-weight: 500;
   text-align: center;
   /* Increase the spacing a tad */
@@ -321,7 +362,7 @@
   text-align: center;
 }
 .picker__day--today {
-  color: #0089ec;
+  color: <?php echo $main_color; ?>;
   position: relative;
 }
 .picker__day--today:before {
@@ -331,43 +372,43 @@
   right: 2px;
   width: 0;
   height: 0;
-  border-top: 0.5em solid #0059bc;
+  border-top: 0.5em solid <?php echo adjustBrightness($main_color, -50); ?>;
   border-left: .5em solid transparent;
 }
 .picker__day--selected,
 .picker__day--selected:hover {
-  border-color: #0089ec;
+  border-color: <?php echo $main_color; ?>;
 }
 .picker__day--highlighted {
-  background: #b1dcfb;
+  background: <?php echo adjustBrightness($main_color, 150); ?>;
 }
 .picker__day--disabled:before {
-  border-top-color: #aaaaaa;
+  border-top-color: <?php echo adjustBrightness($background_color, -75); ?>;
 }
 .picker__day--outfocus {
-  color: #dddddd;
+  color: <?php echo adjustBrightness($background_color, -50); ?>;
 }
 .picker__day--infocus:hover,
 .picker__day--outfocus:hover {
   cursor: pointer;
-  color: #000000;
-  background: #b1dcfb;
+  color: <?php echo $text_color; ?>;
+  background: <?php echo adjustBrightness($main_color, 150); ?>;
 }
 .picker__day--highlighted:hover,
 .picker--focused .picker__day--highlighted {
-  background: #0089ec;
-  color: #ffffff;
+  background: <?php echo $main_color; ?>;
+  color: <?php echo $background_color; ?>;
 }
 .picker__day--disabled,
 .picker__day--disabled:hover {
-  background: #f5f5f5;
-  border-color: #f5f5f5;
-  color: #dddddd;
+  background: <?php echo adjustBrightness($background_color, -10); ?>;
+  border-color: <?php echo adjustBrightness($background_color, -10); ?>;
+  color: <?php echo adjustBrightness($background_color, -50); ?>;
   cursor: default;
 }
 .picker__day--highlighted.picker__day--disabled,
 .picker__day--highlighted.picker__day--disabled:hover {
-  background: #bbbbbb;
+  background: <?php echo adjustBrightness($background_color, -40); ?>;
 }
 /**
  * The footer containing the "today" and "clear" buttons.
@@ -377,8 +418,9 @@
 }
 .picker__button--today,
 .picker__button--clear {
-  border: 1px solid #ffffff;
-  background: #ffffff;
+  border: 1px solid <?php echo $background_color; ?>;
+  background: <?php echo $background_color; ?>;
+  color: <?php echo $text_color; ?>;
   font-size: .8em;
   padding: .66em 0;
   font-weight: bold;
@@ -389,14 +431,14 @@
 .picker__button--today:hover,
 .picker__button--clear:hover {
   cursor: pointer;
-  color: #000000;
-  background: #b1dcfb;
-  border-bottom-color: #b1dcfb;
+  color: <?php echo $text_color; ?>;
+  background: <?php echo adjustBrightness($main_color, 150); ?>;
+  border-bottom-color: <?php echo adjustBrightness($main_color, 150); ?>;
 }
 .picker__button--today:focus,
 .picker__button--clear:focus {
-  background: #b1dcfb;
-  border-color: #0089ec;
+  background: <?php echo adjustBrightness($main_color, 150); ?>;
+  border-color: <?php echo $main_color; ?>;
   outline: none;
 }
 .picker__button--today:before,
@@ -410,7 +452,7 @@
   margin-right: .45em;
   top: -0.05em;
   width: 0;
-  border-top: 0.66em solid #0059bc;
+  border-top: 0.66em solid <?php echo adjustBrightness($main_color, -50); ?>;
   border-left: .66em solid transparent;
 }
 .picker__button--clear:before {

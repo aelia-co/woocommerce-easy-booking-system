@@ -4,7 +4,7 @@ class WC_EBS extends WC_AJAX {
 
     public function __construct() {
 
-        // get plugin options values
+        // Get plugin options values
         $this->options = get_option('wc_ebs_options');
 
         add_action( 'wp_enqueue_scripts', array( $this, 'wc_ebs_enqueue_scripts' ));
@@ -16,6 +16,8 @@ class WC_EBS extends WC_AJAX {
         add_action( 'wp_ajax_nopriv_add_new_price', array( $this, 'wc_ebs_get_new_price' ));
         add_filter( 'add_to_cart_fragments', array( $this, 'wc_ebs_new_price_fragment' ));
         add_filter( 'woocommerce_loop_add_to_cart_link', array($this, 'wc_ebs_custom_loop_add_to_cart' ), 10, 2 );
+        add_action( 'wp_ajax_dynamic_css', array( $this, 'wc_ebs_dynamic_css'));
+        add_action( 'wp_ajax_nopriv_dynamic_css', array( $this, 'wc_ebs_dynamic_css'));
     }
 
     public function wc_ebs_enqueue_scripts() {
@@ -28,30 +30,36 @@ class WC_EBS extends WC_AJAX {
         // Load scripts only on product page if "booking" option is checked
         $wc_ebs_options = get_post_meta($post->ID, '_booking_option', true);
 
-        if ( is_product() && $wc_ebs_options) {
+        if ( is_product() && $wc_ebs_options ) {
 
             // Concatenated and minified script including datepick.js, legacy.js, picker.js and picker.date.js
-            wp_enqueue_script( 'datepicker', plugins_url( '/js/pickadate.min.js', __FILE__ ), array('jquery'), '1.0', true);
+            // wp_enqueue_script( 'datepicker', plugins_url( '/js/pickadate.min.js', __FILE__ ), array('jquery'), '1.0', true);
 
-            // wp_enqueue_script( 'picker', plugins_url( '/js/picker.js', __FILE__ ), array('jquery'), '1.0', true);
-            // wp_enqueue_script( 'picker.date', plugins_url( '/js/picker.date.js', __FILE__ ), array('jquery'), '1.0', true);
-            // wp_enqueue_script( 'legacy', plugins_url( '/js/legacy.js', __FILE__ ), array('jquery'), '1.0', true);
-            // wp_enqueue_script( 'datepick', plugins_url( '/js/datepick.js', __FILE__ ), array('jquery'), '1.0', true);
+            wp_enqueue_script( 'picker', plugins_url( '/js/picker.js', __FILE__ ), array('jquery'), '1.0', true);
+            wp_enqueue_script( 'picker.date', plugins_url( '/js/picker.date.js', __FILE__ ), array('jquery'), '1.0', true);
+            wp_enqueue_script( 'legacy', plugins_url( '/js/legacy.js', __FILE__ ), array('jquery'), '1.0', true);
+            wp_enqueue_script( 'datepick', plugins_url( '/js/datepick.js', __FILE__ ), array('jquery'), '1.0', true);
 
             wp_enqueue_script( 'datepicker.language', plugins_url( '/js/translations/' . $lang . '.js', __FILE__ ), array('jquery'), '1.0', true);
 
-            wp_register_style( 'picker', plugins_url('/css/default.min.css', __FILE__), true);
+            wp_enqueue_style('picker',
+                 admin_url('admin-ajax.php').'?action=dynamic_css');
 
-            wp_enqueue_style( 'picker' );
+            // wp_enqueue_style( 'picker' );
             // wp_enqueue_style( 'picker.date' );
 
             // in javascript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
-            wp_localize_script( 'datepicker', 'ajax_object',
-                    array( 
-                        'ajax_url' => admin_url( 'admin-ajax.php' )
-                    )
-                );
+            wp_localize_script( 'datepick', 'ajax_object',
+                array( 
+                    'ajax_url' => admin_url( 'admin-ajax.php' )
+                )
+            );
         }
+    }
+
+    public function wc_ebs_dynamic_css() {
+        include_once('/css/default.min.css.php');
+        die();
     }
 
     // Add checkbox to the product admin page
@@ -94,12 +102,12 @@ class WC_EBS extends WC_AJAX {
             echo '<div class="wc_ebs_errors">' . wc_print_notices() . '</div>
                 <p>
                     <label for="start_date">' . __( $this->options['wc_ebs_start_date_text'], 'wc_ebs' ) . ' : </label>
-                    <input type="hidden" id="variation_id" name="variation_id" value="">
-                    <input type="text" id="start_date" class="datepicker1" data-product_id="' . $product->id . '" data-variation_id="" data-value="">
+                    <input type="hidden" id="variation_id" name="variation_id" data-product_id="' . $product->id . '" value="">
+                    <input type="text" id="start_date" class="datepicker datepicker_start" data-value="">
                 </p>
                 <p>
                     <label for="end_date">' . __( $this->options['wc_ebs_end_date_text'], 'wc_ebs' ) . ' : </label>
-                    <input type="text" id="end_date" class="datepicker2" data-product_id="' . $product->id . '" data-value="">
+                    <input type="text" id="end_date" class="datepicker datepicker_end" data-value="">
                 </p>';
 
             if ( ! $product->is_type( 'variable' ) ) {
@@ -117,19 +125,18 @@ class WC_EBS extends WC_AJAX {
     public function wc_ebs_add_price_html($content) {
 
         global $woocommerce, $post;
-
-        $output = isset($_POST['days']) ? $_POST['days'] : 1; // Booking duration
-        $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : $post->ID; // Product ID
-        $variation_id = isset($_POST['variation_id']) ? $_POST['variation_id'] : ''; // Variation ID
+        
+        $product_id = isset($_POST['product_id']) && intval($_POST['product_id']) ? $_POST['product_id'] : $post->ID; // Product ID
 
         $wc_ebs_options = get_post_meta($product_id, '_booking_option', true); // Is it bookable ?
+        $duration = get_post_meta($product_id, '_booking_duration', true); // Booking duration
         $new_price = get_post_meta($product_id, '_booking_price', true); // New booking price
         $currency = get_woocommerce_currency_symbol(); // Currency
 
         // Return either the new price or a price / day or normal price
-        if ( isset($_POST['days']) && $_POST['days'] > 0 ) {
+        /*if ( isset( $duration ) && $duration > 0 ) {
             return sprintf( get_woocommerce_price_format(), $currency, $new_price );
-        } else if ( isset($wc_ebs_options) && $wc_ebs_options == 'yes' ) {
+        } else */if ( isset( $wc_ebs_options ) && $wc_ebs_options == 'yes' ) {
             return $content . __(' / day', 'wc_ebs');
         } else {
             return $content;
@@ -142,37 +149,38 @@ class WC_EBS extends WC_AJAX {
 
         global $woocommerce, $post;
 
-        $output = isset($_POST['days']) ? $_POST['days'] : 1; // Booking duration
-        $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : ''; // Product ID
-        $variation_id = isset($_POST['variation_id']) ? $_POST['variation_id'] : ''; // Variation ID
-        $start_date = isset($_POST['start']) ? $_POST['start'] : ''; // Booking start date
-        $end_date = isset($_POST['end']) ? $_POST['end'] : ''; // Booking end date
+        $duration = isset($_POST['days']) && intval( $_POST['days'] ) ? $_POST['days'] : 1; // Booking duration
+        $product_id = isset($_POST['product_id']) && intval($_POST['product_id'] ) ? $_POST['product_id'] : ''; // Product ID
+        $variation_id = isset($_POST['variation_id']) && intval($_POST['variation_id'] ) ? $_POST['variation_id'] : ''; // Variation ID
+        $start_date = isset($_POST['start']) ? sanitize_text_field($_POST['start']) : ''; // Booking start date
+        $end_date = isset($_POST['end']) ? sanitize_text_field($_POST['end']) : ''; // Booking end date
 
         $product = get_product( $product_id ); // Product object
         
         // If product is variable, get variation price
         if ( $product->is_type( 'variable' ) ) {
 
+            if ( empty( $variation_id ) )
+                $error_code = 3;
+
             $variable_product = new WC_Product_Variation( $variation_id );
             $variation_price = $variable_product ->regular_price;
-            $new_price = $variation_price * $output;
+            $new_price = $variation_price * $duration;
 
         } else {
 
             $price = get_post_meta($product_id,'_price', true); // Product price (Regular or sale)
-            $new_price = $price * $output;
+            $new_price = $price * $duration;
 
         }
 
         // If number of days is inferior to 0
-        if ( $output <= 0 ) {
+        if ( $duration <= 0 )
             $error_code = 1;
-        }
 
         // If one date is empty
-        if ( $start_date == '' || $end_date == '' ) {
+        if ( $start_date == '' || $end_date == '' )
             $error_code = 2;
-        }
 
         // Show error message
         if ( isset( $error_code ) ) {
@@ -185,7 +193,7 @@ class WC_EBS extends WC_AJAX {
         } else {
 
             // Update product meta
-            $this->wc_ebs_update_product_meta( $product_id, $new_price, $start_date, $end_date );
+            $this->wc_ebs_update_product_meta( $product_id, $new_price, $duration, $start_date, $end_date );
 
             // Update product price
             $product->get_price_html();
@@ -209,6 +217,9 @@ class WC_EBS extends WC_AJAX {
             case 2:
                 $err = __( 'Please choose two dates', 'wc_ebs' );
             break;
+            case 3:
+                $err = __( 'Please select product option', 'wc_ebs' );
+            break;
             default:
                 $err = '';
             break;
@@ -218,15 +229,14 @@ class WC_EBS extends WC_AJAX {
     }
 
     // Update product meta (New price, start date and end date)
-    public function wc_ebs_update_product_meta( $product_id, $new_price, $start_date, $end_date ) {
+    public function wc_ebs_update_product_meta( $product_id, $new_price, $duration, $start_date, $end_date ) {
 
         global $woocommerce;
 
         add_post_meta( $product_id, '_booking_price', $new_price, true ) || update_post_meta( $product_id, '_booking_price', $new_price );
-
-        add_post_meta( $product_id, '_start_date', $new_price, true ) || update_post_meta( $product_id, '_start_date', $new_price );
-
-        add_post_meta( $product_id, '_end_date', $new_price, true ) || update_post_meta( $product_id, '_end_date', $new_price );
+        add_post_meta( $product_id, '_booking_duration', $duration, true ) || update_post_meta( $product_id, '_booking_duration', $duration );
+        add_post_meta( $product_id, '_start_date', $start_date, true ) || update_post_meta( $product_id, '_start_date', $start_date );
+        add_post_meta( $product_id, '_end_date', $end_date, true ) || update_post_meta( $product_id, '_end_date', $end_date );
 
     }
 
@@ -258,17 +268,17 @@ class WC_EBS extends WC_AJAX {
 
         global $woocommerce, $post, $product;
         
-        $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : $product->id;
-        $product = get_product( $product_id );
+        $product_id = isset($_POST['product_id']) && intval($_POST['product_id']) ? $_POST['product_id'] : $product->id;
+        $new_price = get_post_meta($product_id, '_booking_price', true); // New booking price
+        $currency = get_woocommerce_currency_symbol(); // Currency
 
-        if ( isset($_POST['days']) ) {
+        if ( get_post_meta($product_id, '_booking_duration', true) ) {
 
             ob_start();
-                echo '<span class="price">' . $product->get_price_html() . '</span>';
+                echo '<span class="price">' . sprintf( get_woocommerce_price_format(), $currency, $new_price ) . '</span>';
             $fragments['span.price'] = ob_get_clean();
 
         }
-        
 
         return $fragments;
 
@@ -280,7 +290,7 @@ class WC_EBS extends WC_AJAX {
         global $woocommerce, $post, $product;
         $wc_ebs_options = get_post_meta($post->ID, '_booking_option', true);
 
-        if (isset($wc_ebs_options) && $wc_ebs_options) {
+        if ( isset($wc_ebs_options) && $wc_ebs_options == "yes" ) {
 
             $link = get_permalink( $product->id );
             $label = __( 'Select dates', 'wc_ebs' );
