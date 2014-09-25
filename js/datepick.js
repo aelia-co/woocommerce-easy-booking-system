@@ -82,6 +82,7 @@
 			});
 		}
 
+		// Clear picker when variation changes
 		$( '.variations_form' ).on( 'change', '.variations select', function() {
 			pickerStart.clear();
 			pickerEnd.clear();

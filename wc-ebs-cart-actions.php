@@ -53,6 +53,10 @@ class WC_EBS_Cart extends WC_Cart {
     // Reset meta data after adding to cart
     function wc_ebs_reset_product_meta( $product_id, $base_price, $start, $end ) {
 
+        if ( get_post_meta( $product_id, '_booking_duration', true ) ) {
+            delete_post_meta($product_id, '_booking_duration');
+        }
+
         if ( get_post_meta( $product_id, '_booking_price', true ) ) {
             delete_post_meta($product_id, '_booking_price');
         }
@@ -118,10 +122,10 @@ class WC_EBS_Checkout extends WC_Checkout {
 
     public function wc_ebs_add_order_meta($item_id, $values) {
         if ( ! empty( $values['_start_date'] ) )
-            woocommerce_add_order_item_meta( $item_id, $this->options['wc_ebs_start_date_text'], $values['_start_date'] );
+            woocommerce_add_order_item_meta( $item_id, isset( $this->options['wc_ebs_start_date_text'] ), $values['_start_date'] );
 
         if ( ! empty( $values['_end_date'] ) )
-            woocommerce_add_order_item_meta( $item_id, $this->options['wc_ebs_end_date_text'], $values['_end_date'] );
+            woocommerce_add_order_item_meta( $item_id, isset( $this->options['wc_ebs_end_date_text'] ), $values['_end_date'] );
     }
 
 }

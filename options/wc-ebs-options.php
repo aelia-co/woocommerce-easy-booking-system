@@ -10,14 +10,14 @@ class WC_EBS_settings {
 		// initialize options the first time
 		if ( !$this->options ) {
 		
-		    $this->options = array( 'wc_ebs_info_text_display' => '',
-		    						'wc_ebs_info_text' => '',
-		    						'wc_ebs_start_date_text' => 'Début', 
-		                            'wc_ebs_end_date_text' => 'Fin',
+		    $this->options = array( 'wc_ebs_info_text' => '',
+		    						'wc_ebs_start_date_text' => __('Start', 'wc_ebs'), 
+		                            'wc_ebs_end_date_text' => __('End', 'wc_ebs'),
 		                            'wc_ebs_background_color' => '#FFFFFF',
 		                            'wc_ebs_color_select' => '#0089EC',
 		                            'wc_ebs_text_color' => '#000000'
 		                        );
+
 		    add_option('wc_ebs_options', $this->options);
 
 		}
@@ -28,8 +28,6 @@ class WC_EBS_settings {
 			add_action('admin_init', array($this, 'wc_ebs_admin_init'));
 
 		}
-
-		
 
 	}
 
@@ -52,18 +50,10 @@ class WC_EBS_settings {
 		);
 
 		add_settings_section(
-			'wc_ebs_main',
-			'Text settings',
+			'wc_ebs_main_text',
+			__('Text settings', 'wc_ebs'),
 			array( $this, 'wc_ebs_section_text' ),
 			'wc_ebs_options'
-		);
-
-		add_settings_field(
-			'wc_ebs_info_text_display',
-			__('Display information text', 'wc_ebs'),
-			array( $this, 'wc_ebs_info_text_display' ),
-			'wc_ebs_options',
-			'wc_ebs_main'
 		);
 
 		add_settings_field(
@@ -71,7 +61,7 @@ class WC_EBS_settings {
 			__('Information text', 'wc_ebs'),
 			array( $this, 'wc_ebs_info_text' ),
 			'wc_ebs_options',
-			'wc_ebs_main'
+			'wc_ebs_main_text'
 		);
 
 		add_settings_field(
@@ -79,7 +69,7 @@ class WC_EBS_settings {
 			__('First date title', 'wc_ebs'),
 			array( $this, 'wc_ebs_start_date' ),
 			'wc_ebs_options',
-			'wc_ebs_main'
+			'wc_ebs_main_text'
 		);
 
 		add_settings_field(
@@ -87,7 +77,14 @@ class WC_EBS_settings {
 			__('Second date title', 'wc_ebs'),
 			array( $this, 'wc_ebs_end_date' ),
 			'wc_ebs_options',
-			'wc_ebs_main'
+			'wc_ebs_main_text'
+		);
+
+		add_settings_section(
+			'wc_ebs_main_color',
+			__('Color settings', 'wc_ebs'),
+			array( $this, 'wc_ebs_section_color' ),
+			'wc_ebs_options'
 		);
 
 		add_settings_field(
@@ -95,7 +92,7 @@ class WC_EBS_settings {
 			__('Background color', 'wc_ebs'),
 			array( $this, 'wc_ebs_background' ),
 			'wc_ebs_options',
-			'wc_ebs_main'
+			'wc_ebs_main_color'
 		);
 
 		add_settings_field(
@@ -103,7 +100,7 @@ class WC_EBS_settings {
 			__('Main color', 'wc_ebs'),
 			array( $this, 'wc_ebs_color' ),
 			'wc_ebs_options',
-			'wc_ebs_main'
+			'wc_ebs_main_color'
 		);
 
 		add_settings_field(
@@ -111,7 +108,7 @@ class WC_EBS_settings {
 			__('Text color', 'wc_ebs'),
 			array( $this, 'wc_ebs_text' ),
 			'wc_ebs_options',
-			'wc_ebs_main'
+			'wc_ebs_main_color'
 		);
 
 	}
@@ -126,10 +123,10 @@ class WC_EBS_settings {
 
 			<form method="post" action="options.php">
 
-			<?php settings_fields('wc_ebs_options'); ?>
-			<?php do_settings_sections('wc_ebs_options'); ?>
-			 
-			<?php submit_button(); ?>
+				<?php settings_fields('wc_ebs_options'); ?>
+				<?php do_settings_sections('wc_ebs_options'); ?>
+				 
+				<?php submit_button(); ?>
 
 			</form>
 
@@ -142,13 +139,9 @@ class WC_EBS_settings {
 		echo '<p>' . __('Make this plugin yours by choosing the different texts you want to display !', 'wc_ebs') . '</p>';
 	}
 
-	public function wc_ebs_info_text_display() {
-		echo '<input id="plugin_text_string" name="wc_ebs_options[wc_ebs_info_text_display]" type="checkbox" value="1"' . checked( 1, isset( $this->options['wc_ebs_info_text_display'] ), false ) .  '/>
-		<p class="description">' . __('Choose to display or not an information text before date inputs', 'wc_ebs') . '</p>';
-	}
-
 	public function wc_ebs_info_text() {
-		echo '<textarea id="plugin_text_string" name="wc_ebs_options[wc_ebs_info_text]" rows="4" cols="50" />' . $this->options['wc_ebs_info_text'] . '</textarea>';
+		echo '<textarea id="plugin_text_string" name="wc_ebs_options[wc_ebs_info_text]" rows="4" cols="50" />' . $this->options['wc_ebs_info_text'] . '</textarea>
+		<p class="description">' . __('Displays an information text before date inputs. Leave empty if you don\'t want the information text.' , 'wc_ebs') . '</p>';
 	}
 
 	public function wc_ebs_start_date() {
@@ -159,6 +152,10 @@ class WC_EBS_settings {
 	public function wc_ebs_end_date() {
 		echo '<input id="plugin_text_string" name="wc_ebs_options[wc_ebs_end_date_text]" size="40" type="text" value="' . $this->options['wc_ebs_end_date_text'] . '" />
 		<p class="description">' . __('Text displayed before the second date', 'wc_ebs') . '</p>';
+	}
+
+	public function wc_ebs_section_color() {
+		echo '<p>' . __('Customize the calendar so it looks great with your theme !', 'wc_ebs') . '</p>';
 	}
 
 	public function wc_ebs_background() {
@@ -178,8 +175,8 @@ class WC_EBS_settings {
 
 	public function sanitize_values( $settings ) {
 		
-		foreach($settings as $key => $value) {
-			$settings[$key] = esc_html($value);
+		foreach ( $settings as $key => $value ) {
+			$settings[$key] = esc_html( $value );
 		}
 
 		return $settings;
