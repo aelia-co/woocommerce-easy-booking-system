@@ -7,7 +7,9 @@ class WC_EBS extends WC_AJAX {
         // Get plugin options values
         $this->options = get_option('wc_ebs_options');
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'wc_ebs_enqueue_scripts' ));
+        if ( !is_admin() )
+            add_action( 'wp_enqueue_scripts', array( $this, 'wc_ebs_enqueue_scripts' ));
+
         add_action( 'product_type_options', array( $this, 'wc_ebs_add_product_option_pricing' ));
         add_filter( 'woocommerce_process_product_meta', array( $this, 'wc_ebs_add_custom_price_fields_save' ));
         add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'wc_ebs_before_add_to_cart_button' ));
@@ -42,7 +44,8 @@ class WC_EBS extends WC_AJAX {
 
             wp_enqueue_script( 'datepicker.language', plugins_url( '/js/translations/' . $lang . '.js', __FILE__ ), array('jquery'), '1.0', true);
 
-            wp_enqueue_style('picker', admin_url('admin-ajax.php').'?action=dynamic_css');
+            if ( ! is_ajax() )
+                wp_enqueue_style('picker', admin_url('admin-ajax.php').'?action=dynamic_css');
 
             // in javascript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
             wp_localize_script( 'datepicker', 'ajax_object',
@@ -264,7 +267,7 @@ class WC_EBS extends WC_AJAX {
 
         global $woocommerce, $post, $product;
         
-        $product_id = isset($_POST['product_id']) && intval($_POST['product_id']) ? $_POST['product_id'] : $product->id;
+        $product_id = isset($_POST['product_id']) && intval($_POST['product_id']) ? $_POST['product_id'] : '';
         $new_price = get_post_meta($product_id, '_booking_price', true); // New booking price
         $currency = get_woocommerce_currency_symbol(); // Currency
 

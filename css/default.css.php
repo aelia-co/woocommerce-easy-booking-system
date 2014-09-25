@@ -5,7 +5,6 @@ $background_color = isset( $this->options['wc_ebs_background_color'] ) ? $this->
 $main_color = isset( $this->options['wc_ebs_color_select'] ) ? $this->options['wc_ebs_color_select'] : '#0089EC';
 $text_color = isset( $this->options['wc_ebs_text_color'] ) ? $this->options['wc_ebs_text_color'] : '#000000';
 
-
 function adjustBrightness($hex, $steps) {
     // Steps should be between -255 and 255. Negative = darker, positive = lighter
     $steps = max(-255, min(255, $steps));

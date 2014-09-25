@@ -160,17 +160,17 @@ class WC_EBS_settings {
 
 	public function wc_ebs_background() {
 		$background_color = ( isset( $this->options['wc_ebs_background_color'] ) ) ? $this->options['wc_ebs_background_color'] : '';
-		echo '<input type="text"  name="wc_ebs_options[wc_ebs_background_color]" class="color-field" value="' . $background_color . '">';
+		echo '<input type="text" name="wc_ebs_options[wc_ebs_background_color]" class="color-field" value="' . $background_color . '">';
 	}
 
 	public function wc_ebs_color() {
 		$main_color = ( isset( $this->options['wc_ebs_color_select'] ) ) ? $this->options['wc_ebs_color_select'] : '';
-		echo '<input type="text"  name="wc_ebs_options[wc_ebs_color_select]" class="color-field" value="' . $main_color . '">';
+		echo '<input type="text" name="wc_ebs_options[wc_ebs_color_select]" class="color-field" value="' . $main_color . '">';
 	}
 
 	public function wc_ebs_text() {
 		$text_color = ( isset( $this->options['wc_ebs_text_color'] ) ) ? $this->options['wc_ebs_text_color'] : '';
-		echo '<input type="text"  name="wc_ebs_options[wc_ebs_text_color]" class="color-field" value="' . $text_color . '">';
+		echo '<input type="text" name="wc_ebs_options[wc_ebs_text_color]" class="color-field" value="' . $text_color . '">';
 	}
 
 	public function sanitize_values( $settings ) {

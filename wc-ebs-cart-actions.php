@@ -17,7 +17,7 @@ class WC_EBS_Cart extends WC_Cart {
         global $woocommerce;
  
         $booking_price = get_post_meta($product_id, '_booking_price', true);
-        $base_price = get_post_meta($product_id, '_price', true);
+        $booking_duration = get_post_meta($product_id, '_booking_duration', true);
         $start = get_post_meta($product_id, '_start_date', true);
         $end = get_post_meta($product_id, '_end_date', true);
 
@@ -25,7 +25,7 @@ class WC_EBS_Cart extends WC_Cart {
         $cart_item_meta['_start_date'] = $start;
         $cart_item_meta['_end_date'] = $end;
 
-        $this->wc_ebs_reset_product_meta( $product_id, $base_price, $start, $end );
+        $this->wc_ebs_reset_product_meta( $product_id, $booking_duration, $booking_price, $start, $end );
 
         return $cart_item_meta;
     }
@@ -51,7 +51,7 @@ class WC_EBS_Cart extends WC_Cart {
     }
 
     // Reset meta data after adding to cart
-    function wc_ebs_reset_product_meta( $product_id, $base_price, $start, $end ) {
+    function wc_ebs_reset_product_meta( $product_id, $booking_duration, $booking_price, $start, $end ) {
 
         if ( get_post_meta( $product_id, '_booking_duration', true ) ) {
             delete_post_meta($product_id, '_booking_duration');
@@ -122,10 +122,10 @@ class WC_EBS_Checkout extends WC_Checkout {
 
     public function wc_ebs_add_order_meta($item_id, $values) {
         if ( ! empty( $values['_start_date'] ) )
-            woocommerce_add_order_item_meta( $item_id, isset( $this->options['wc_ebs_start_date_text'] ), $values['_start_date'] );
+            woocommerce_add_order_item_meta( $item_id, $this->options['wc_ebs_start_date_text'], $values['_start_date'] );
 
         if ( ! empty( $values['_end_date'] ) )
-            woocommerce_add_order_item_meta( $item_id, isset( $this->options['wc_ebs_end_date_text'] ), $values['_end_date'] );
+            woocommerce_add_order_item_meta( $item_id, $this->options['wc_ebs_end_date_text'], $values['_end_date'] );
     }
 
 }
