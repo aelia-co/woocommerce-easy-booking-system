@@ -87,25 +87,32 @@ class WC_EBS extends WC_AJAX {
 
         // Is product bookable ?
         $wc_ebs_options = get_post_meta($post->ID, '_booking_option', true);
+        $info_text = $this->options['wc_ebs_info_text'];
+        $start_date_text = $this->options['wc_ebs_start_date_text'];
+        $end_date_text = $this->options['wc_ebs_end_date_text'];
 
         // Product is bookable
         if ( isset($wc_ebs_options) && $wc_ebs_options == 'yes' ) {
 
             // Display info text
-            if ( isset( $this->options['wc_ebs_info_text'] ) && ! empty ( $this->options['wc_ebs_info_text'] ) ) {
-                echo '<p class="woocommerce-info">' . __( $this->options['wc_ebs_info_text'] ) . '</p>';
+            if ( isset( $info_text ) && ! empty ( $info_text ) ) {
+                echo apply_filters( 'wc_ebs_before_picker_form',
+                    '<p class="woocommerce-info">' . esc_html__( $info_text ) . '</p>', $info_text );
             }
 
-            echo '<div class="wc_ebs_errors">' . wc_print_notices() . '</div>
-                <p>
-                    <label for="start_date">' . __( $this->options['wc_ebs_start_date_text'], 'wc_ebs' ) . ' : </label>
+            echo '<div class="wc_ebs_errors">' . wc_print_notices() . '</div>';
+
+            // Please do not remove inputs' attributes (classes, ids, etc.)
+            echo apply_filters( 'wc_ebs_picker_form',
+                '<p>
+                    <label for="start_date">' . esc_html__( $start_date_text ) . ' : </label>
                     <input type="hidden" id="variation_id" name="variation_id" data-product_id="' . $product->id . '" value="">
                     <input type="text" id="start_date" class="datepicker datepicker_start" data-value="">
                 </p>
                 <p>
-                    <label for="end_date">' . __( $this->options['wc_ebs_end_date_text'], 'wc_ebs' ) . ' : </label>
+                    <label for="end_date">' . esc_html__( $end_date_text ) . ' : </label>
                     <input type="text" id="end_date" class="datepicker datepicker_end" data-value="">
-                </p>';
+                </p>', $start_date_text, $end_date_text );
 
             // If product is not variable, add a new price field before add to cart button
             if ( ! $product->is_type( 'variable' ) )
