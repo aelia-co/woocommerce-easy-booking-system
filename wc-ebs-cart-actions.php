@@ -73,12 +73,15 @@ class WC_EBS_Cart extends WC_Cart {
  
     function wc_ebs_get_item_data($other_data, $cart_item) {
 
+        $start_text = ! empty( $this->options['wc_ebs_start_date_text'] ) ? $this->options['wc_ebs_start_date_text'] : __('Start', 'wc_ebs');
+        $end_text = ! empty( $this->options['wc_ebs_end_date_text'] ) ? $this->options['wc_ebs_end_date_text'] : __('End', 'wc_ebs');
+
         if ( isset($cart_item['_start_date']) && $cart_item['_start_date'] ) {
  
             $startDate = $cart_item['_start_date'];
 
             // Add custom data to product data
-            $other_data[] = array('name' => __( $this->options['wc_ebs_start_date_text'], 'wc_ebs' ), 'value' => $startDate);
+            $other_data[] = array('name' => $start_text, 'value' => $startDate);
         }
 
         if ( isset($cart_item['_end_date']) && $cart_item['_end_date'] ) {
@@ -86,7 +89,7 @@ class WC_EBS_Cart extends WC_Cart {
             $endDate = $cart_item['_end_date'];
             
             // Add custom data to product data
-            $other_data[] = array('name' => __( $this->options['wc_ebs_end_date_text'], 'wc_ebs' ), 'value' => $endDate);
+            $other_data[] = array('name' => $end_text, 'value' => $endDate);
         }
 
         return $other_data;
@@ -102,8 +105,6 @@ class WC_EBS_Cart extends WC_Cart {
  
         return $cart_item;
     }
-
-
 
 }
 
@@ -121,11 +122,15 @@ class WC_EBS_Checkout extends WC_Checkout {
     }
 
     public function wc_ebs_add_order_meta($item_id, $values) {
+
+        $start_text = ! empty( $this->options['wc_ebs_start_date_text'] ) ? $this->options['wc_ebs_start_date_text'] : __('Start', 'wc_ebs');
+        $end_text = ! empty( $this->options['wc_ebs_end_date_text'] ) ? $this->options['wc_ebs_end_date_text'] : __('End', 'wc_ebs');
+
         if ( ! empty( $values['_start_date'] ) )
-            woocommerce_add_order_item_meta( $item_id, $this->options['wc_ebs_start_date_text'], $values['_start_date'] );
+            wc_add_order_item_meta( $item_id, $start_text, $values['_start_date'] );
 
         if ( ! empty( $values['_end_date'] ) )
-            woocommerce_add_order_item_meta( $item_id, $this->options['wc_ebs_end_date_text'], $values['_end_date'] );
+            wc_add_order_item_meta( $item_id, $end_text, $values['_end_date'] );
     }
 
 }
