@@ -9,6 +9,10 @@ Author URI: http://ashanna.com
 Licence : GPL
 */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 function wc_ebs_init() {
     // Check if WooCommerce is active
     if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
