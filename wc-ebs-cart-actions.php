@@ -10,7 +10,7 @@ class WC_EBS_Cart extends WC_Cart {
 
         // get plugin options values
         $this->options = get_option('wc_ebs_options');
-        
+
         add_filter('woocommerce_add_to_cart_validation', array($this, 'ebs_check_dates_before_add_to_cart'), 20, 2);
         add_filter('woocommerce_add_cart_item_data', array( $this, 'wc_ebs_add_cart_item_data'), 10, 2);
         add_filter('woocommerce_get_cart_item_from_session', array( $this, 'wc_ebs_get_cart_item_from_session'), 10, 2);
@@ -32,10 +32,10 @@ class WC_EBS_Cart extends WC_Cart {
 
                 $start_date = $booking_session[$product_id]['start_date']; // Formated dates
                 $end_date = $booking_session[$product_id]['end_date']; // Formated dates
-            
+
                 if ( isset( $start_date ) && isset( $end_date ) ) {
                     $passed = true;
-                } 
+                }
 
             } else {
                 wc_add_notice( __( 'Please choose two dates', 'wc_ebs' ), 'error' );
@@ -49,7 +49,7 @@ class WC_EBS_Cart extends WC_Cart {
 
     function wc_ebs_add_cart_item_data($cart_item_meta, $product_id) {
         global $woocommerce;
- 
+
         $booking_session = WC()->session->get( 'booking' );
 
         if ( ! empty( $booking_session ) ) {
@@ -66,19 +66,28 @@ class WC_EBS_Cart extends WC_Cart {
             $cart_item_meta['_end_date'] = $end_date;
             $cart_item_meta['_ebs_start'] = $start;
             $cart_item_meta['_ebs_end'] = $end;
+						// Aelia - Keep track of booking duration. It will be used for price recalculation in the active currency
+            $cart_item_meta['_booking_duration'] = $booking_duration;
 
             WC()->session->set( 'booking', '' );
-            
+
         }
 
         return $cart_item_meta;
     }
- 
+
     function wc_ebs_get_cart_item_from_session($cart_item, $values) {
 
+				// Aelia - Keep track of booking duration. It will be used for price recalculation in the active currency
+        if (isset($values['_booking_duration'])) {
+            $cart_item['_booking_duration'] = $values['_booking_duration'];
+        }
+
         // Add the form options meta to the cart item in case you want to do special stuff on the check out page.
-        if (isset($values['_booking_price']))
-            $cart_item['_booking_price'] = $values['_booking_price'];
+        if (isset($values['_booking_price'])) {
+					// Aelia - Get the booking price in the active currency
+          $cart_item['_booking_price'] = $this->get_booking_price($cart_item['data'], $values['_booking_duration']);
+        }
 
         if (isset($values['_start_date']))
             $cart_item['_start_date'] = $values['_start_date'];
@@ -93,10 +102,10 @@ class WC_EBS_Cart extends WC_Cart {
             $cart_item['_ebs_end'] = $values['_ebs_end'];
 
         $this->wc_ebs_add_cart_item($cart_item);
-     
+
         return $cart_item;
     }
- 
+
     function wc_ebs_get_item_data($other_data, $cart_item) {
         global $woocommerce;
 
@@ -112,20 +121,41 @@ class WC_EBS_Cart extends WC_Cart {
 
         return $other_data;
     }
- 
+
     function wc_ebs_add_cart_item($cart_item) {
         global $woocommerce;
- 
+
         if ( isset( $cart_item['_booking_price'] ) && $cart_item['_booking_price'] > 0 ) {
             $booking_price = $cart_item['_booking_price'];
             $cart_item['data']->set_price($booking_price);
         }
- 
+
         return $cart_item;
     }
 
-}
+		/**
+		 * Returns a booking price in the active currency. Currency conversion is
+		 * automatically handled by the WooCommerce Currency Switcher developed by
+		 * Aelia. When the plugin is not installed, no conversion occurs, and the
+		 * code will work smoothly anyway.
+		 *
+		 * @param WC_Product $product A bookable product.
+		 * @param int $booking_duration The booking duration.
+		 * @return float The booking price, in the active currency.
+		 * @author Diego Zanella (Aelia) <admin@aelia.co)
+		 */
+		protected function get_booking_price($product, $booking_duration) {
+			// Aelia - Get product price in the active currency
+			if(get_option('woocommerce_tax_display_shop') == 'incl') {
+				$price = $product->get_price_including_tax();
+			}
+			else {
+				$price = $product->get_price_excluding_tax();
+			}
+			return ($price * $booking_duration);
+		}
 
+}
 new WC_EBS_Cart();
 
 class WC_EBS_Checkout extends WC_Checkout {
